@@ -46,17 +46,26 @@ export class Selector {
     if (!matchers.length) {
       matchers = Selector.defaultMatchers;
     }
+    const doc = this.editor.document;
     const newSelections = this.selections.map((selection) => {
-      const content = this.editor.document.getText();
-      const matchedRanges = matchers.map((matcher) =>
-        matcher.match(
-          OffsetRange.fromEditorRange(this.editor, selection),
-          content
+      const content = doc.getText();
+      const matchedRanges = matchers
+        .map((matcher) =>
+          matcher.match(
+            OffsetRange.fromEditorRange(this.editor, selection),
+            content
+          )
         )
-      );
-      const newRange = OffsetRange.min(...matchedRanges).toEditorRange(
-        this.editor
-      );
+        .filter((range) => !!range) as OffsetRange[];
+
+      let newRange: vscode.Range;
+      if (matchedRanges.length) {
+        newRange = OffsetRange.min(...matchedRanges).toEditorRange(this.editor);
+      } else {
+        const startPosition = doc.positionAt(0);
+        const endPosition = doc.positionAt(content.length);
+        newRange = new vscode.Range(startPosition, endPosition);
+      }
       const newSelection = new vscode.Selection(newRange.start, newRange.end);
       return newSelection;
     });

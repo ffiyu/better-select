@@ -1,4 +1,3 @@
-// js hello world
-function helloWorld() {
-  console.log("Hello World");
+function HelloWorld() {
+  alert("Hello World!");
 }
